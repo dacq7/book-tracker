@@ -1,23 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import BookForm from "./components/BookForm";
+import BookList from "./components/BookList";
+import QuoteList from "./components/QuoteList";
 
 function App() {
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+
+  const reloadBooks = () => {
+    setRefresh(!refresh);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: "20px" }}>
+      <h1>Book Tracker</h1>
+
+      <BookForm onBookCreated={reloadBooks} />
+
+      <BookList
+        key={refresh}
+        onSelectBook={(book) => setSelectedBook(book)}
+      />
+
+      {selectedBook && <QuoteList book={selectedBook} />}
     </div>
   );
 }
