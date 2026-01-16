@@ -1,43 +1,36 @@
-from app import db
-from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 
-# Modelo Usuario
-class Usuario(db.Model):
+db = SQLAlchemy()
+
+class Book(db.Model):
+    __tablename__ = "books"
+
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    libros = db.relationship('Libro', backref='usuario', lazy=True)
+    title = db.Column(db.String(200), nullable=False)
+    author = db.Column(db.String(150), nullable=False)
+    status = db.Column(db.String(20), nullable=False)  # pending, reading, finished
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    quotes = db.relationship("Quote", backref="book", cascade="all, delete-orphan")
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "author": self.author,
+            "status": self.status
+        }
 
-# Modelo Libro
-class Libro(db.Model):
+
+class Quote(db.Model):
+    __tablename__ = "quotes"
+
     id = db.Column(db.Integer, primary_key=True)
-    titulo = db.Column(db.String(200), nullable=False)
-    autor = db.Column(db.String(100))
-    genero = db.Column(db.String(50))
-    anio = db.Column(db.Integer)
-    estado = db.Column(db.String(20), default='Pendiente')  # Pendiente, Leyendo, Leído
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
-    comentarios = db.relationship('Comentario', backref='libro', lazy=True)
-    frases = db.relationship('FraseFavorita', backref='libro', lazy=True)
+    text = db.Column(db.Text, nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("books.id"), nullable=False)
 
-# Modelo Comentario
-class Comentario(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    contenido = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=datetime.utcnow)
-    libro_id = db.Column(db.Integer, db.ForeignKey('libro.id'), nullable=False)
-
-# Modelo FraseFavorita
-class FraseFavorita(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    contenido = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=datetime.utcnow)
-    libro_id = db.Column(db.Integer, db.ForeignKey('libro.id'), nullable=False)
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "text": self.text,
+            "book_id": self.book_id
+        }

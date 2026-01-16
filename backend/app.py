@@ -1,24 +1,19 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
 
-# Configuración de la app
+from models import db
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///books.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'tu_clave_secreta_aqui'
-
-# Inicialización de extensiones
-db = SQLAlchemy(app)
-jwt = JWTManager(app)
 CORS(app)
 
-# Ruta de prueba
-@app.route('/')
-def home():
-    return "Backend funcionando"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///booktracker.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Ejecutar la app
-if __name__ == '__main__':
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
+if __name__ == "__main__":
     app.run(debug=True)
